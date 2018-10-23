@@ -4,7 +4,9 @@ import copy
 def get_features():
 
 	fmat = read_features()
-	custom_f(fmat)
+	train_cf = custom_f(fmat)
+
+	return train_cf
 
 def read_features():
 
@@ -67,8 +69,9 @@ def read_features():
 			else:
 				bvec.append(0)
 		else:
-			print line
-			print
+			pass
+			#print line
+			#print
 
 		i += 1
 

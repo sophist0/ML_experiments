@@ -20,10 +20,11 @@ CSV_COLUMN_NAMES = ['survival','pclass','sex','child','sibling/spouse','parent']
 def main(argv):
 
 	# construct features
-	gf.get_features()
-
-	# get the data.
-	train_tmp = pd.read_csv('train_2.csv',names=CSV_COLUMN_NAMES,header=0)
+	tmat = gf.get_features()	
+	train_tmp = pd.DataFrame(data=tmat, index=range(1,len(tmat)+1), columns=CSV_COLUMN_NAMES)
+	
+	# get the data from csv.
+	#train_tmp = pd.read_csv('train_2.csv',names=CSV_COLUMN_NAMES,header=0)
 
 	ivec = range(train_tmp.shape[0])
 	random.shuffle(ivec)
