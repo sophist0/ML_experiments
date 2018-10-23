@@ -2,7 +2,7 @@
 ## This code was modified from Google's Tensor Flow example code demoing the use of premade estimators: premade_estimator.py
 ## I use part of the data set from Kaggle Titantic challenge to predict passenger survival.
 ##
-## Version 1: Linear Regression, no feature selection with penalties or feature normalization, does not perform much better then predicting women survive
+## Version 2: Linear Regression, no feature selection with penalties, performs about the same as predicting women survive
 ## ============================================================================================================================
 
 from __future__ import absolute_import
@@ -13,7 +13,7 @@ import numpy as np
 import tensorflow as tf
 import random
 import pandas as pd
-import train_f as gf
+import train_f2 as gf
 
 CSV_COLUMN_NAMES = ['survival','pclass','sex','child','sibling/spouse','parent']
 
@@ -58,7 +58,7 @@ def main(argv):
 	print()
 	print("#########################################################################")
 	print()
-	print('Test set average loss: ',eval_result['average_loss'])
+	print('Test set model average loss: ',eval_result['average_loss'])
 	print()
 
 	# get predictions as a generator
@@ -69,16 +69,45 @@ def main(argv):
 		pvec.append(int(round(p["predictions"][0])))
 
 	test_labels = test_y.values
-	c = 0
-	for x in range(len(pvec)):
-		if pvec[x] == test_labels[x]:
-			c += 1
+	model_acc = get_acc(pvec, test_labels)
 
-	acc = 100 * c/len(pvec)
-	print("Test set accuracy: ", acc)
+	svec = test_x.pop('sex')
+	slist = svec.tolist()
+	slist = un_norm(slist)
+	sex_acc = get_acc(slist, test_labels)
+
+	print("Test set model accuracy: ", model_acc)
+	print()
+	print("Test set female model accuracy: ", sex_acc)
 	print()
 	print("#########################################################################")
-	print()	
+	print()
+
+def un_norm(svec):
+
+	# hack to recover un normalized sex labels as 0, 1
+
+	m = max(svec)
+	for x in range(len(svec)):
+		if svec[x] == m:
+			svec[x] = 1
+		else:
+			svec[x] = 0
+
+	return svec
+	
+
+def get_acc(pred_vec, label_vec):
+
+	c = 0
+	for x in range(len(pred_vec)):
+		if pred_vec[x] == label_vec[x]:
+			c += 1
+
+	acc = 100 * c/len(pred_vec)
+
+	return acc
+
 
 def input_func(features,labels,batch_size,buffer_size):
 

@@ -25,7 +25,7 @@ def read_features():
 	# sex
 	svec = []
 	
-	# child
+	# age
 	cvec = []
 
 	# sibling or spouse
@@ -49,15 +49,23 @@ def read_features():
 				svec.append(0)
 
 
-			if l[6] != '' and int(float(l[6])) < 18:
-				# child
-				cvec.append(1)
-			elif l[6] != '': 
+			#if l[6] != '' and int(float(l[6])) < 18:
+			#	# child
+			#	cvec.append(1)
+			#elif l[6] != '': 
+			#	# adult
+			#	cvec.append(-1)
+			#else:
+			#	# unknown
+			#	cvec.append(0)
+
+			if l[6] != '': 
 				# adult
-				cvec.append(0)
+				cvec.append(18 - int(float(l[6])))
 			else:
 				# unknown
-				cvec.append(-1)
+				cvec.append(0)
+
 
 			if int(float(l[7])) > 0:
 				avec.append(1)
@@ -77,7 +85,35 @@ def read_features():
 
 	f.close()
 
-	return [uvec, lvec, svec, cvec, avec, bvec]
+	#uvec = np.asarray(uvec) 
+	lvec = np.asarray(lvec) 
+	svec = np.asarray(svec) 
+	cvec = np.asarray(cvec) 
+	avec = np.asarray(avec) 
+	bvec = np.asarray(bvec)
+
+	#uvec2 = norm_vec(uvec)
+	lvec2 = norm_vec(lvec)
+	svec2 = norm_vec(svec)
+	cvec2 = norm_vec(cvec)
+	avec2 = norm_vec(avec)
+	bvec2 = norm_vec(bvec)
+
+	print
+	print lvec2.mean()
+	print lvec2.std()
+	print
+
+	return [uvec, lvec2, svec2, cvec2, avec2, bvec2]
+
+def norm_vec(vec):
+
+	v_ave = vec.mean()
+	v_std = vec.std()
+
+	vec2 = (vec - v_ave) / float(v_std)
+
+	return vec2
 
 def custom_f(fmat):
 
