@@ -1,7 +1,7 @@
 ## ============================================================================================================================
 ## I use part of the data set from Kaggle Titantic challenge to predict passenger survival.
 ##
-## Version 3: Logistic Regression, accuracy about the same as assuming all women survive, regulation weight selected adhoc.
+## Version 3: Logistic Regression, accuracy about the same as assuming all women survive.
 ## ============================================================================================================================
 
 from __future__ import absolute_import
@@ -17,6 +17,13 @@ import train_f2 as gf
 CSV_COLUMN_NAMES = ['survival','pclass','sex','child','sibling/spouse','parent']
 
 def main(argv):
+
+	################################################
+	# parameters chosen via trial and error using
+	# logreg_trials_v2.py
+	lr = 0.1 # learning rate
+	rw = 0	 # regulator weight
+	################################################
 
 	# construct features
 	tmat = gf.get_features()	
@@ -66,11 +73,11 @@ def main(argv):
 		loss = tf.multiply(tf.constant(-1/float(num_train), dtype=tf.float64), tf.add(c1,c2))
 
 		# add regulation term
-		reg_term = tf.multiply(tf.constant(0.01, dtype=tf.float64),tf.matmul(tf.transpose(weights),weights))
+		reg_term = tf.multiply(tf.constant(rw, dtype=tf.float64),tf.matmul(tf.transpose(weights),weights))
 		loss = tf.add(loss,reg_term)
 
 		# Optimizer.
-		optimizer = tf.train.GradientDescentOptimizer(0.25).minimize(loss)
+		optimizer = tf.train.GradientDescentOptimizer(lr).minimize(loss)
 	  
 		train_prediction = l_prob
 
