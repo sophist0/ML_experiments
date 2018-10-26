@@ -99,11 +99,6 @@ def read_features():
 	avec2 = norm_vec(avec)
 	bvec2 = norm_vec(bvec)
 
-	print
-	print lvec2.mean()
-	print lvec2.std()
-	print
-
 	return [uvec, lvec2, svec2, cvec2, avec2, bvec2]
 
 def norm_vec(vec):

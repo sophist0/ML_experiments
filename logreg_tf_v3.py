@@ -1,8 +1,7 @@
 ## ============================================================================================================================
-## This code was modified from Google's Tensor Flow example code demoing the use of premade estimators: premade_estimator.py
 ## I use part of the data set from Kaggle Titantic challenge to predict passenger survival.
 ##
-## Version 2: Linear Regression, no feature selection with penalties, performs about the same as predicting women survive
+## Version 3: Logistic Regression, accuracy about the same as assuming all women survive, regulation weight selected adhoc.
 ## ============================================================================================================================
 
 from __future__ import absolute_import
@@ -23,59 +22,87 @@ def main(argv):
 	tmat = gf.get_features()	
 	train_tmp = pd.DataFrame(data=tmat, index=range(1,len(tmat)+1), columns=CSV_COLUMN_NAMES)
 	
-	# get the data from csv.
-	#train_tmp = pd.read_csv('train_2.csv',names=CSV_COLUMN_NAMES,header=0)
-
 	ivec = range(train_tmp.shape[0])
 	random.shuffle(ivec)
 
 	# split out the training set	
 	ps = 0.8
-	l = int(ps*train_tmp.shape[0])
+	num_train = int(ps*train_tmp.shape[0])
 	
-	train = train_tmp.iloc[ivec[0:l]]
-	test = train_tmp.iloc[ivec[l:-1]]
+	train = train_tmp.iloc[ivec[0:num_train]]
+	test = train_tmp.iloc[ivec[num_train:-1]]
 
+	num_labels = 1
 	train_x, train_y = train, train.pop('survival')
 	test_x, test_y = test, test.pop('survival')
 
-	# Feature columns describe how to use the input.
-	my_feature_columns = []
-	for key in train_x.keys():
-		my_feature_columns.append(tf.feature_column.numeric_column(key=key))
+	# Setup logistic regression model
+	graph = tf.Graph()
+	with graph.as_default():
 
-	# Setup linear regression model
-	batch_size = 32
-        buffer_size = 1000 # maximum number of elements in the dataset that are shuffled at once
-	model = tf.estimator.LinearRegressor(feature_columns=my_feature_columns)
+		tf_train_dataset = tf.constant(train_x)
+		tf_train_labels = tf.constant(train_y)
+
+		data_col = tf_train_dataset.shape[1].value
+		weights = tf.Variable(tf.truncated_normal([data_col, num_labels]))
+		biases = tf.Variable(tf.zeros([num_labels]))
+
+		weights = tf.cast(weights, dtype=tf.float64)
+		biases = tf.cast(biases, dtype=tf.float64)
+
+		tf_train_labels = tf.reshape(tf_train_labels,[num_train,1])
+		tf_train_labels = tf.cast(tf_train_labels, dtype=tf.float64)
+		
+		logits = tf.matmul(tf_train_dataset, weights) + biases
+
+		one = tf.constant(1, dtype=tf.float64)
+
+		# logistic function giving the probability of being label 1, ie survive
+		l_prob = tf.truediv(one, tf.add(one,tf.exp(-logits)))
+
+		# logistic loss function
+		c1 = tf.matmul(tf.transpose(tf_train_labels),tf.log(l_prob))
+		c2 = tf.matmul(tf.transpose(tf.subtract(one,tf_train_labels)),tf.log(tf.subtract(one,l_prob)))
+		loss = tf.multiply(tf.constant(-1/float(num_train), dtype=tf.float64), tf.add(c1,c2))
+
+		# add regulation term
+		reg_term = tf.multiply(tf.constant(0.01, dtype=tf.float64),tf.matmul(tf.transpose(weights),weights))
+		loss = tf.add(loss,reg_term)
+
+		# Optimizer.
+		optimizer = tf.train.GradientDescentOptimizer(0.25).minimize(loss)
+	  
+		train_prediction = l_prob
+
+		tf_test_dataset = tf.constant(test_x)
+		tf_test_labels = tf.constant(test_y)
+		test_prediction = tf.matmul(tf_test_dataset, weights) + biases
 
 
-	"""Builds, trains, and evaluates the model."""
-	model.train(input_fn=lambda:input_func(train_x,train_y,batch_size,buffer_size), steps=2500)
+	num_steps = 801
+	with tf.Session(graph=graph) as session:
+		tf.global_variables_initializer().run()
+	  	print('Initialized')
+	  	for step in range(num_steps):
+	    		_, l, predictions = session.run([optimizer, loss, train_prediction])
 
-	eval_result = model.evaluate(input_fn=lambda:input_func_test(test_x,test_y,batch_size=1))
+	    		if (step % 100 == 0):
+	      			print('Loss at step %d: %f' % (step, l))
+
+		# Requires the session to be defined, "with...", to evaluate
+		test_labels = test_y.values
+		test_p = th_pred(test_prediction.eval())
+		model_acc = get_acc(test_p, test_y.values)
 
 	print()
 	print("#########################################################################")
 	print()
-	print('Test set model average loss: ',eval_result['average_loss'])
-	print()
-
-	# get predictions as a generator
-	pred = model.predict(input_fn=lambda:input_func_eval(test_x, None,batch_size=1))
-
-	pvec = []
-	for p in list(pred):
-		pvec.append(int(round(p["predictions"][0])))
-
-	test_labels = test_y.values
-	model_acc = get_acc(pvec, test_labels)
 
 	svec = test_x.pop('sex')
 	slist = svec.tolist()
 	slist = un_norm(slist)
 	sex_acc = get_acc(slist, test_labels)
-
+	
 	print("Test set model accuracy: ", model_acc)
 	print()
 	print("Test set female model accuracy: ", sex_acc)
@@ -83,10 +110,21 @@ def main(argv):
 	print("#########################################################################")
 	print()
 
+
+def th_pred(pvec):
+
+	# threshold the predictions
+	for x in range(len(pvec)):
+		if pvec[x] <= 0.5:
+			pvec[x] = 0
+		else:
+			pvec[x] = 1
+
+	return pvec
+
 def un_norm(svec):
 
 	# hack to recover un normalized sex labels as 0, 1
-
 	m = max(svec)
 	for x in range(len(svec)):
 		if svec[x] == m:
@@ -101,6 +139,7 @@ def get_acc(pred_vec, label_vec):
 
 	c = 0
 	for x in range(len(pred_vec)):
+		#print(str(pred_vec[x]) + ', ' + str(label_vec[x]))
 		if pred_vec[x] == label_vec[x]:
 			c += 1
 
