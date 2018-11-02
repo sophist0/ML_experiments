@@ -155,45 +155,6 @@ def get_acc(pred_vec, label_vec):
 	return acc
 
 
-def input_func(features,labels,batch_size,buffer_size):
-
-     	# Convert the inputs to a Dataset.
-     	dataset = tf.data.Dataset.from_tensor_slices((dict(features), labels))
-
-     	# Shuffle, repeat, and batch the examples.
-   	dataset = dataset.shuffle(buffer_size).repeat().batch(batch_size)
-
-	return dataset
-
-def input_func_test(features,labels,batch_size):
-
-     	# Convert the inputs to a Dataset.
-     	dataset = tf.data.Dataset.from_tensor_slices((dict(features), labels))
-
-     	# Shuffle, repeat, and batch the examples.
-   	dataset = dataset.batch(batch_size)
-
-	return dataset
-
-def input_func_eval(features, labels, batch_size):
-    """An input function for evaluation or prediction"""
-    features=dict(features)
-    if labels is None:
-        # No labels, use only features.
-        inputs = features
-    else:
-        inputs = (features, labels)
-
-    # Convert the inputs to a Dataset.
-    dataset = tf.data.Dataset.from_tensor_slices(inputs)
-
-    # Batch the examples
-    assert batch_size is not None, "batch_size must not be None"
-    dataset = dataset.batch(batch_size)
-
-    # Return the dataset.
-    return dataset
-
 if __name__ == "__main__":
 
   	# The Estimator periodically generates "INFO" logs; make these logs visible.
