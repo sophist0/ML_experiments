@@ -180,7 +180,7 @@ with tf.Session() as session:
 	print('###################################################################')
 	print()
 
-	plt.plot(hvec,rvec,label="Logistic Regression")
+	plt.plot(hvec,rvec,label="Neural Net")
 	plt.plot(hvec,svec,label="Women Survive")
 	plt.legend()
 	plt.xlabel("Regulator Weight")
