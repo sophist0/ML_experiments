@@ -25,11 +25,11 @@ from sklearn.neighbors import KNeighborsClassifier
 tn = 50 # number of the negative class to test
 #tn = 100 # number of the negative class to test
 
-ptrials = 10
-trials = 100
+#ptrials = 10
+#trials = 100
 
-#ptrials = 100
-#trials = 1000
+ptrials = 100
+trials = 1000
 ROC = True
 
 ##############################################################
