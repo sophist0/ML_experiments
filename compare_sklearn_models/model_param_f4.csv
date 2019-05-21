@@ -1,0 +1,20 @@
+nnc param 1: ,3,12,4
+svc param 1: ,6
+rfc param 1: ,4
+knn param 1: ,8,2
+nnc param 2: ,2,12,4
+svc param 2: ,2
+rfc param 2: ,3
+knn param 2: ,5,1
+lr acc:,0.6907894736842105
+nnc acc:,0.756578947368421
+svc acc:,0.75
+rfc acc:,0.7105263157894737
+knn acc:,0.756578947368421
+gnb acc:,0.7302631578947368
+ws acc:,0.6973684210526315
+lr (meta) acc:,0.743421052631579
+nnc acc (meta):,0.743421052631579
+svc (meta) acc:,0.7631578947368421
+knn acc (meta):,0.756578947368421
+gnb acc (meta):,0.75
