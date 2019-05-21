@@ -326,6 +326,157 @@ def class_easy(name, REDUCED_m, REDUCED_f):
 
 	return [df_m, df_f, n_ave_m, n_ave_f, n_std_m, n_std_f, m_uvec, f_uvec, pvec_m, pvec_f]
 
+def class_easy_OLD(name, REDUCED):
+
+	# class easy samples
+	df_train = pd.read_csv(name, sep=',')
+	df_train_m = df_train[df_train['sex']==0]
+	df_train_f = df_train[df_train['sex']==1]
+
+	################################################################
+	# Separate Samples
+	################################################################
+
+	# predictions
+	pvec_m = []
+	pvec_f = []
+	# male unpredicted
+	m_uvec = []
+	# female unpredicted
+	f_uvec = []
+
+	for x in range(len(df_train_m['sex'])):
+
+		done = False
+
+		# TEST
+		if 1:
+			# adult
+			if df_train_m['Master.'].iloc[x] == 0:
+
+				if df_train_m['cabin_unknown'].iloc[x]==1:
+
+					pvec_m.append(0)
+					done = True
+
+		if done == False:
+			m_uvec.append(x)
+			pvec_m.append(-1)
+
+	################################################################################
+
+	for x in range(len(df_train_f['sex'])):
+
+		done = False
+
+		# TEST
+		if 1:
+			# adult
+			if df_train_f['Miss.'].iloc[x] == 0:
+
+				if df_train_f['pclass'].iloc[x]==1 or df_train_f['pclass'].iloc[x]==2 or df_train_f['cabin_unknown'].iloc[x]==0 or df_train_f['onesur'].iloc[x]==1:
+
+					pvec_f.append(1)
+					done = True
+
+			# child
+			else:
+
+				if df_train_f['pclass'].iloc[x]==1 or df_train_f['pclass'].iloc[x]==2:
+
+					pvec_f.append(1)
+					done = True
+
+		if done == False:
+			f_uvec.append(x)
+			pvec_f.append(-1)
+
+	################################################################
+	# Get reduced training sets
+	################################################################
+	M = False
+	for x in range(len(df_train_m['sex'])):
+		if x in m_uvec and REDUCED == True:		
+			row = df_train_m.iloc[[x]]
+			if M == False:
+				df_m = pd.DataFrame(row.values, columns = row.columns)
+				M = True
+			else:
+				df_m = df_m.append(row)
+
+		elif REDUCED == False:
+			row = df_train_m.iloc[[x]]
+			if M == False:
+				df_m = pd.DataFrame(row.values, columns = row.columns)
+				M = True
+			else:
+				df_m = df_m.append(row)
+
+	#########################################
+	# HACK to get old results for SVM
+	tmp = df_m.pop('Master.')
+	tmp = df_m.pop('onedie')
+	tmp = df_m.pop('fare_unknown')
+	#########################################
+
+	F = False
+	for x in range(len(df_train_f['sex'])):
+		if x in f_uvec and REDUCED == True:
+			row = df_train_f.iloc[[x]]
+			if F == False:
+				df_f = pd.DataFrame(row.values, columns = row.columns)
+				F = True
+			else:
+				df_f = df_f.append(row)
+
+		elif REDUCED == False:
+			row = df_train_f.iloc[[x]]
+			if F == False:
+				df_f = pd.DataFrame(row.values, columns = row.columns)
+				F = True
+			else:
+				df_f = df_f.append(row)
+
+	#################################################################
+	# Cut number of features for each model
+	#################################################################
+
+	tcol = list(df_m.columns)
+	tcol.remove('survived')
+	tcol.remove('pid')
+
+	# Normalize feature columns
+	n_std_m = df_m[tcol].std()
+	n_std_f = df_f[tcol].std()
+	val_m = n_std_m.values
+	val_f = n_std_f.values
+
+	tcol_m = []
+	tcol_f = []
+	for x in range(len(tcol)):	# get cols with zero std 
+		if val_m[x] > 0:
+			tcol_m.append(tcol[x])
+		if val_f[x] > 0:
+			tcol_f.append(tcol[x])
+
+	df_m = df_m[['pid','survived']+tcol_m]
+	df_f = df_f[['pid','survived']+tcol_f]
+
+	n_ave_m = df_m[tcol_m].mean()
+	n_std_m = df_m[tcol_m].std()
+	print
+	print n_ave_m
+	print
+	df_m[tcol_m] = (df_m[tcol_m]- n_ave_m) / n_std_m
+
+	n_ave_f = df_f[tcol_f].mean()
+	n_std_f = df_f[tcol_f].std()
+	df_f[tcol_f] = (df_f[tcol_f]- n_ave_f) / n_std_f
+
+	return [df_m, df_f, n_ave_m, n_ave_f, n_std_m, n_std_f, m_uvec, f_uvec, pvec_m, pvec_f]
+
+
+
 def pca_trans(df, eigVec, cols):
 
 	if eigVec == []:

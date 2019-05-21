@@ -32,9 +32,7 @@ def main():
 	# Data parameters
 
 	PCA = False
-	# both true or false distinction turned out not to be useful here
-	REDUCED_m = True
-	REDUCED_f = True
+	REDUCED = True
 	###############################
 
 	###############################
@@ -59,17 +57,17 @@ def main():
 	#model = 'gnb'
 	###############################
 
-	if PCA and REDUCED_m and REDUCED_f:
+	if PCA and REDUCED:
 		path="fsets_pca_red/"
-	elif not PCA and REDUCED_m and REDUCED_f:
+	elif not PCA and REDUCED:
 		path="fsets_red/"
-	elif PCA and ((not REDUCED_m) and (not REDUCED_f)):
+	elif PCA and not REDUCED:
 		path="fsets_pca/"
-	elif not PCA and ((not REDUCED_m) and (not REDUCED_f)):
+	elif not PCA and not REDUCED:
 		path="fsets/"
 
 	save_f = "data/train_3.csv"
- 	[df_train_m, df_train_f, n_ave_m, n_ave_f, n_std_m, n_std_f, mu_train, fu_train, ptm, ptf] = ut.class_easy(save_f,REDUCED_m,REDUCED_f)
+ 	[df_train_m, df_train_f, n_ave_m, n_ave_f, n_std_m, n_std_f, mu_train, fu_train, ptm, ptf] = ut.class_easy_OLD(save_f,REDUCED)
 
 	tcol_m = list(df_train_m.columns)
 	tcol_f = list(df_train_f.columns)

@@ -1,11 +1,11 @@
 nnc param 1: ,2,9,3
-svc param 1: ,4
+svc param 1: ,3
 rfc param 1: ,4
 knn param 1: ,3,1
-nnc param 2: ,1,11,4
+nnc param 2: ,2,13,2
 svc param 2: ,1
-rfc param 2: ,3
-knn param 2: ,3,1
+rfc param 2: ,5
+knn param 2: ,6,1
 lr acc:,0.8157894736842105
 nnc acc:,0.7781954887218046
 svc acc:,0.8195488721804511
@@ -13,8 +13,8 @@ rfc acc:,0.7894736842105263
 knn acc:,0.7669172932330827
 gnb acc:,0.7894736842105263
 ws acc:,0.8045112781954887
-lr (meta) acc:,0.7518796992481203
-nnc acc (meta):,0.7631578947368421
-svc (meta) acc:,0.7481203007518797
-knn acc (meta):,0.7518796992481203
-gnb acc (meta):,0.7406015037593985
+lr (meta) acc:,0.7481203007518797
+nnc acc (meta):,0.7556390977443609
+svc (meta) acc:,0.7443609022556391
+knn acc (meta):,0.7443609022556391
+gnb acc (meta):,0.7669172932330827
