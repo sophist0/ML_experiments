@@ -1,0 +1,7 @@
+This model represents a couple weeks of work but I did not go through and make sure everything was stable and repeatable as I would for a research project. Therefore the various fsets are the best features chosen using 
+
+best_features.py 
+
+Unfortunately when I reran best_features.py it failed because I changed utility_15.py since I ran it last. I modified best_features so it runs but its giving me different sets of best features then it did originally features which perform worse then my best results.
+
+So I copied my old features sets from a backup which works. But its annoying that you can't run all the code and get the exact same results I got initially. Probably should have been more careful about fixing random seed values.
